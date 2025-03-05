@@ -1,0 +1,6 @@
+<h2>Your Health Records</h2>
+<ul>
+    {% for record in records %}
+        <li><a href="/uploads/{{ record[2] }}" download>{{ record[2] }}</a></li>
+    {% endfor %}
+</ul>
