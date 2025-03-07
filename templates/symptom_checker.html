@@ -1,9 +1,110 @@
-<h2>Symptom Checker</h2>
-<form method="POST">
-    Symptom: <input type="text" name="symptom" required>
-    <button type="submit">Check Advice</button>
-</form>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Symptom Checker - Pregnancy Health Care</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(to bottom right, #fce4ec, #f8bbd0);
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0;
+        }
+        .container {
+            background-color: #ffffff;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.2);
+            text-align: center;
+            width: 100%;
+            max-width: 420px;
+            position: relative;
+        }
+        h2 {
+            color: #ff4081;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+            text-align: left;
+        }
+        .form-group label {
+            font-weight: bold;
+            display: block;
+            margin-bottom: 5px;
+        }
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            outline: none;
+            resize: none;
+            height: 100px;
+            transition: border-color 0.3s ease;
+        }
+        .form-group textarea:focus {
+            border-color: #ff4081;
+        }
+        .btn {
+            background: linear-gradient(to right, #ff4081, #ff79b0);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 30px;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+            transition: all 0.3s ease;
+        }
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(255,64,129,0.3);
+        }
+        .advice-box {
+            margin-top: 15px;
+            padding: 15px;
+            background: #fff3f8;
+            border: 1px solid #ff79b0;
+            border-radius: 8px;
+            text-align: left;
+        }
+        .advice-box h3 {
+            margin: 0 0 5px;
+            color: #ff4081;
+        }
+        .top-image {
+            width: 80px;
+            position: absolute;
+            top: -40px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <img src="{{ url_for('static', filename='pregnancy_icon.png') }}" class="top-image" alt="Logo">
+        <h2>Symptom Checker</h2>
+        <form method="POST" action="{{ url_for('symptom_checker') }}">
+            <div class="form-group">
+                <label for="symptom">Describe Your Symptom</label>
+                <textarea name="symptom" required></textarea>
+            </div>
+            <button type="submit" class="btn">Check Advice</button>
+        </form>
 
-{% if advice %}
-    <p><strong>Advice:</strong> {{ advice }}</p>
-{% endif %}
+        {% if advice %}
+            <div class="advice-box">
+                <h3>Advice:</h3>
+                <p>{{ advice }}</p>
+            </div>
+        {% endif %}
+    </div>
+</body>
+</html>

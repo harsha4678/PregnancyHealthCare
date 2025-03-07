@@ -1,7 +1,100 @@
-<h2>Book Appointment</h2>
-<form method="POST">
-    Doctor Name: <input type="text" name="doctor" required><br>
-    Date: <input type="date" name="date" required><br>
-    Time: <input type="time" name="time" required><br>
-    <button type="submit">Book</button>
-</form>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Book Appointment - Pregnancy Health Care</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(to bottom right, #fce4ec, #f8bbd0);
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0;
+        }
+        .container {
+            background-color: #ffffff;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.2);
+            text-align: center;
+            width: 100%;
+            max-width: 420px;
+            position: relative;
+        }
+        h2 {
+            color: #ff4081;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+            text-align: left;
+        }
+        .form-group label {
+            font-weight: bold;
+            display: block;
+            margin-bottom: 5px;
+        }
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            outline: none;
+        }
+        .form-group input:focus, .form-group select:focus {
+            border-color: #ff4081;
+        }
+        .btn {
+            background: linear-gradient(to right, #ff4081, #ff79b0);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 30px;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+            transition: all 0.3s ease;
+        }
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(255,64,129,0.3);
+        }
+        .top-image {
+            width: 80px;
+            position: absolute;
+            top: -40px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        .emoji {
+            font-size: 20px;
+            margin-right: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <img src="{{ url_for('static', filename='pregnancy_icon.png') }}" class="top-image" alt="Logo">
+        <h2>📅 Book Appointment</h2>
+        <form method="POST" action="{{ url_for('book_appointment') }}">
+            <div class="form-group">
+                <label><span class="emoji">👩‍⚕️</span> Doctor's Name</label>
+                <input type="text" name="doctor_name" required>
+            </div>
+            <div class="form-group">
+                <label><span class="emoji">📆</span> Date</label>
+                <input type="date" name="date" required>
+            </div>
+            <div class="form-group">
+                <label><span class="emoji">⏰</span> Time</label>
+                <input type="time" name="time" required>
+            </div>
+            <button type="submit" class="btn">Book Appointment ✅</button>
+        </form>
+    </div>
+</body>
+</html>

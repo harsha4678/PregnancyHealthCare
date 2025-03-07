@@ -1,11 +1,78 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Pregnancy Care App</title>
+    <title>Pregnancy Health Care - Welcome</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(to bottom right, #fce4ec, #f8bbd0);
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0;
+        }
+        .container {
+            background-color: #ffffff;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.2);
+            text-align: center;
+            width: 100%;
+            max-width: 500px;
+            position: relative;
+        }
+        h1 {
+            color: #ff4081;
+            font-weight: 600;
+            margin-bottom: 20px;
+            font-size: 24px;
+        }
+        .welcome-img {
+            width: 100px;
+            margin-bottom: 15px;
+        }
+        .btn {
+            background: linear-gradient(to right, #ff4081, #ff79b0);
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 30px;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+            text-decoration: none;
+            display: inline-block;
+            margin: 8px 0;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(255,64,129,0.3);
+        }
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(255,64,129,0.4);
+        }
+        .btn-register {
+            background: linear-gradient(to right, #ff79b0, #ff4081);
+        }
+        .btn-login {
+            background: linear-gradient(to right, #ff79b0, #ff4081);
+        }
+        p {
+            font-weight: 500;
+            margin-top: 20px;
+            color: #666;
+        }
+    </style>
 </head>
 <body>
-    <h1>Welcome to Pregnancy Health Care App</h1>
-    <a href="{{ url_for('register') }}">Register</a> |
-    <a href="{{ url_for('login') }}">Login</a>
+    <div class="container">
+        <img src="{{ url_for('static', filename='pregnancy_icon.png') }}" class="welcome-img" alt="Welcome Logo">
+        <h1>👶 Welcome to Pregnancy Health Care App</h1>
+        <p>Your trusted companion for a safe and healthy pregnancy journey.</p>
+        <a href="{{ url_for('register') }}" class="btn btn-register">📝 Register</a>
+        <a href="{{ url_for('login') }}" class="btn btn-login">🔑 Login</a>
+    </div>
 </body>
 </html>
