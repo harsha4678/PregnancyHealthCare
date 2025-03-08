@@ -1,100 +1,295 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>Book Appointment - Pregnancy Health Care</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book Appointment</title>
     <style>
-        body {
-            font-family: 'Poppins', sans-serif;
-            background: linear-gradient(to bottom right, #fce4ec, #f8bbd0);
-            height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+        :root {
+            --primary: #4361ee;
+            --secondary: #3f37c9;
+            --success: #4cc9f0;
+            --light-bg: #f8f9fa;
+            --card-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        * {
             margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
-        .container {
-            background-color: #ffffff;
-            padding: 40px;
-            border-radius: 15px;
-            box-shadow: 0 8px 30px rgba(0,0,0,0.2);
-            text-align: center;
-            width: 100%;
-            max-width: 420px;
+        
+        body {
+            background-color: #f0f2f5;
+            color: #333;
+            padding: 20px;
+        }
+        
+        .booking-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .booking-header {
+            margin-bottom: 30px;
+        }
+        
+        .booking-title {
+            font-size: 28px;
+            font-weight: 700;
+            color: #333;
             position: relative;
-        }
-        h2 {
-            color: #ff4081;
-            font-weight: 600;
             margin-bottom: 20px;
         }
-        .form-group {
-            margin-bottom: 15px;
-            text-align: left;
-        }
-        .form-group label {
-            font-weight: bold;
-            display: block;
-            margin-bottom: 5px;
-        }
-        .form-group input, .form-group select {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            outline: none;
-        }
-        .form-group input:focus, .form-group select:focus {
-            border-color: #ff4081;
-        }
-        .btn {
-            background: linear-gradient(to right, #ff4081, #ff79b0);
-            color: white;
-            border: none;
-            padding: 12px 20px;
-            border-radius: 30px;
-            cursor: pointer;
-            font-size: 16px;
-            width: 100%;
-            transition: all 0.3s ease;
-        }
-        .btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 5px 15px rgba(255,64,129,0.3);
-        }
-        .top-image {
-            width: 80px;
+        
+        .booking-title::after {
+            content: "";
             position: absolute;
-            top: -40px;
-            left: 50%;
-            transform: translateX(-50%);
+            left: 0;
+            bottom: -10px;
+            width: 50px;
+            height: 4px;
+            background: var(--primary);
+            border-radius: 2px;
         }
-        .emoji {
-            font-size: 20px;
-            margin-right: 5px;
+
+        .booking-subtitle {
+            font-size: 22px;
+            font-weight: 600;
+            color: #444;
+            margin-bottom: 20px;
+        }
+        
+        .form-card {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: var(--card-shadow);
+            margin-bottom: 30px;
+        }
+        
+        .form-group {
+            margin-bottom: 24px;
+        }
+        
+        .form-label {
+            display: block;
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #444;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 12px 16px;
+            font-size: 16px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            background-color: var(--light-bg);
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
+        }
+        
+        .form-control::placeholder {
+            color: #aaa;
+        }
+
+        .form-select {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%23444' viewBox='0 0 16 16'%3E%3Cpath d='M8 11.5l-5-5L4.5 5 8 8.5 11.5 5 13 6.5l-5 5z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 16px center;
+            padding-right: 40px;
+        }
+        
+        .btn {
+            display: inline-block;
+            font-weight: 600;
+            text-align: center;
+            white-space: nowrap;
+            vertical-align: middle;
+            user-select: none;
+            border: none;
+            padding: 12px 24px;
+            font-size: 16px;
+            line-height: 1.5;
+            border-radius: 8px;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+        
+        .btn-primary {
+            color: white;
+            background-color: var(--primary);
+            box-shadow: 0 2px 4px rgba(67, 97, 238, 0.3);
+        }
+        
+        .btn-primary:hover {
+            background-color: var(--secondary);
+            box-shadow: 0 4px 8px rgba(67, 97, 238, 0.4);
+            transform: translateY(-2px);
+        }
+        
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+        
+        .hospital-card {
+            background-color: white;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 10px;
+            border: 2px solid #eee;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .hospital-card:hover {
+            border-color: var(--primary);
+            box-shadow: 0 2px 6px rgba(67, 97, 238, 0.2);
+        }
+        
+        .hospital-card.selected {
+            border-color: var(--primary);
+            background-color: rgba(67, 97, 238, 0.05);
+        }
+        
+        .hospital-name {
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+        
+        .hospital-address {
+            font-size: 14px;
+            color: #666;
+        }
+        
+        .hospital-rating {
+            color: #ff9800;
+            font-weight: 600;
+        }
+        
+        .form-row {
+            display: flex;
+            gap: 20px;
+        }
+        
+        .form-row .form-group {
+            flex: 1;
+        }
+        
+        .divider {
+            height: 1px;
+            background-color: #eee;
+            margin: 30px 0;
+        }
+        
+        @media (max-width: 768px) {
+            .form-row {
+                flex-direction: column;
+                gap: 0;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <img src="{{ url_for('static', filename='pregnancy_icon.png') }}" class="top-image" alt="Logo">
-        <h2>📅 Book Appointment</h2>
-        <form method="POST" action="{{ url_for('book_appointment') }}">
-            <div class="form-group">
-                <label><span class="emoji">👩‍⚕️</span> Doctor's Name</label>
-                <input type="text" name="doctor_name" required>
-            </div>
-            <div class="form-group">
-                <label><span class="emoji">📆</span> Date</label>
-                <input type="date" name="date" required>
-            </div>
-            <div class="form-group">
-                <label><span class="emoji">⏰</span> Time</label>
-                <input type="time" name="time" required>
-            </div>
-            <button type="submit" class="btn">Book Appointment ✅</button>
-        </form>
+    <div class="booking-container">
+        <div class="booking-header">
+            <h1 class="booking-title">Book Appointment</h1>
+        </div>
+        
+        <div class="form-card">
+            <form method="POST" id="search-form">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="specialization" class="form-label">Specialization</label>
+                        <select id="specialization" name="specialization" class="form-control form-select">
+                            {% for spec in specializations %}
+                                <option value="{{ spec }}">{{ spec }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="location" class="form-label">Location</label>
+                        <input type="text" id="location" name="location" class="form-control" placeholder="City or Area Name" required>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary">Search Hospitals</button>
+            </form>
+        </div>
+        
+        {% if hospitals %}
+        <div class="divider"></div>
+        
+        <h2 class="booking-subtitle">Select a Hospital</h2>
+        
+        <div class="form-card">
+            <form method="POST" id="book-form">
+                <input type="hidden" name="specialization" value="{{ request.form.specialization }}">
+                <input type="hidden" name="location" value="{{ request.form.location }}">
+                
+                <div class="form-group">
+                    <label class="form-label">Choose a hospital</label>
+                    <div class="hospital-options">
+                        {% for hospital in hospitals %}
+                        <div class="hospital-card" onclick="selectHospital(this, '{{ hospital.name }}')">
+                            <div class="hospital-name">{{ hospital.name }}</div>
+                            <div class="hospital-address">{{ hospital.address }} <span class="hospital-rating">⭐ {{ hospital.rating }}</span></div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <input type="hidden" id="hospital_name" name="hospital_name" value="">
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="date" class="form-label">Date</label>
+                        <input type="date" id="date" name="date" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="time" class="form-label">Time</label>
+                        <input type="time" id="time" name="time" class="form-control" required>
+                    </div>
+                </div>
+                <button type="submit" name="confirm" class="btn btn-primary">Confirm Appointment</button>
+            </form>
+        </div>
+        {% endif %}
     </div>
+
+    <script>
+        function selectHospital(element, hospitalName) {
+            // Remove selected class from all hospital cards
+            document.querySelectorAll('.hospital-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+            
+            // Add selected class to clicked card
+            element.classList.add('selected');
+            
+            // Set the hidden input value
+            document.getElementById('hospital_name').value = hospitalName;
+        }
+        
+        // Set min date to today for the date picker
+        document.addEventListener('DOMContentLoaded', function() {
+            const dateInput = document.getElementById('date');
+            if (dateInput) {
+                const today = new Date();
+                const yyyy = today.getFullYear();
+                const mm = String(today.getMonth() + 1).padStart(2, '0');
+                const dd = String(today.getDate()).padStart(2, '0');
+                const formattedDate = `${yyyy}-${mm}-${dd}`;
+                dateInput.min = formattedDate;
+            }
+        });
+    </script>
 </body>
 </html>

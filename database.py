@@ -14,12 +14,13 @@ CREATE TABLE IF NOT EXISTS users (
 )
 ''')
 
-# Create health_records table
+# Create health_records table (fixed foreign key syntax)
 cur.execute('''
 CREATE TABLE IF NOT EXISTS health_records (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     user_id INTEGER,
     file_name TEXT,
+    file_path TEXT,
     upload_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY(user_id) REFERENCES users(id)
 )
@@ -42,7 +43,8 @@ cur.execute('''
 CREATE TABLE IF NOT EXISTS appointments (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     user_id INTEGER,
-    doctor_name TEXT,
+    hospital_name TEXT,
+    specialization TEXT,
     date TEXT,
     time TEXT,
     status TEXT DEFAULT 'Pending',
@@ -50,6 +52,7 @@ CREATE TABLE IF NOT EXISTS appointments (
     FOREIGN KEY(user_id) REFERENCES users(id)
 )
 ''')
+
 
 # Commit and close connection
 conn.commit()

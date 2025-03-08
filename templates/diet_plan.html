@@ -1,55 +1,97 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>Diet Plan - Pregnancy Health Care</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <title>Pregnancy Diet Plan</title>
     <style>
         body {
-            font-family: 'Poppins', sans-serif;
-            background: linear-gradient(to bottom right, #fce4ec, #f8bbd0);
-            height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0;
+            font-family: Arial, sans-serif;
+            margin: 40px;
         }
-        .container {
-            background-color: #ffffff;
-            padding: 40px;
-            border-radius: 15px;
-            box-shadow: 0 8px 30px rgba(0,0,0,0.2);
-            width: 100%;
-            max-width: 500px;
-            text-align: center;
+        h2, h3 {
+            color: #4CAF50;
         }
-        h2 {
-            color: #ff4081;
-            font-weight: 600;
+        form {
             margin-bottom: 20px;
+            padding: 15px;
+            border: 1px solid #ccc;
+            background-color: #f9f9f9;
+            max-width: 500px;
         }
-        .diet-plan-item {
-            background: #fff3f8;
-            padding: 12px;
-            border: 1px solid #ff79b0;
-            border-radius: 8px;
-            margin-bottom: 10px;
-            display: flex;
-            align-items: center;
+        select, button {
+            padding: 8px;
+            margin: 8px 0;
+            width: 100%;
         }
-        .diet-plan-item span {
-            font-size: 24px;
-            margin-right: 12px;
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+        table, th, td {
+            border: 1px solid #ccc;
+            padding: 10px;
+            text-align: left;
+        }
+        th {
+            background-color: #f0f0f0;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h2>🥗 Your Diet Plan</h2>
-        <div class="diet-plan-item"><span>🍎</span>Breakfast: Oats with fruits and milk</div>
-        <div class="diet-plan-item"><span>🥗</span>Lunch: Grilled chicken salad with quinoa</div>
-        <div class="diet-plan-item"><span>🍲</span>Dinner: Vegetable soup with whole grain bread</div>
-        <div class="diet-plan-item"><span>🍌</span>Snacks: Banana and almonds</div>
-        <a href="{{ url_for('dashboard') }}" style="display:inline-block;margin-top:15px;color:#ff4081;font-weight:bold;text-decoration:none;">⬅️ Back to Dashboard</a>
-    </div>
+
+<h2>Customize Your Pregnancy Diet Plan</h2>
+
+<form method="POST">
+    <label><strong>Select Trimester:</strong></label>
+    <select name="trimester" required>
+        {% for t in trimesters %}
+            <option value="{{ t }}" {% if t == selected_trimester %}selected{% endif %}>{{ t }}</option>
+        {% endfor %}
+    </select>
+
+    <label><strong>Select Health Condition (if any):</strong></label>
+    <select name="condition" required>
+        {% for c in health_conditions %}
+            <option value="{{ c }}" {% if c == selected_condition %}selected{% endif %}>{{ c }}</option>
+        {% endfor %}
+    </select>
+
+    <label><strong>Choose Your Diet Preference:</strong></label>
+    <select name="diet" required>
+        {% for d in diets %}
+            <option value="{{ d }}" {% if d == selected_diet %}selected{% endif %}>{{ d }}</option>
+        {% endfor %}
+    </select>
+
+    <label><strong>Choose Your Cultural Preference:</strong></label>
+    <select name="culture" required>
+        {% for culture in cultures %}
+            <option value="{{ culture }}" {% if culture == selected_culture %}selected{% endif %}>{{ culture }}</option>
+        {% endfor %}
+    </select>
+
+    <button type="submit">Generate Diet Plan</button>
+</form>
+
+{% if selected_plan %}
+    <h3>Your Personalized Diet Plan</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Meal</th>
+                <th>Recommended Food</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for meal, food in selected_plan.items() %}
+            <tr>
+                <td>{{ meal }}</td>
+                <td>{{ food }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endif %}
+
 </body>
 </html>
