@@ -2,7 +2,7 @@ from geopy.geocoders import Nominatim
 import googlemaps
 import smtplib
 from datetime import datetime, timedelta
-from dotenv import load_dotenv
+from dotenv import load_dotenv 
 import os
 import requests
 from requests.exceptions import RequestException

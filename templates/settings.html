@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Settings - HiveBuzz</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            line-height: 1.6;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+            background-color: #f8f9fa;
+        }
+        
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            font-size: 2.2rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+        
+        .subtitle {
+            color: #6c757d;
+            margin-top: 0;
+            margin-bottom: 2rem;
+        }
+        
+        .settings-card {
+            background-color: #fff;
+            border-radius: 0.5rem;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+        
+        .settings-header {
+            background-color: #e9f2ff;
+            padding: 1rem 1.5rem;
+            font-size: 1.5rem;
+            font-weight: 500;
+        }
+        
+        .settings-body {
+            padding: 1.5rem;
+        }
+        
+        .settings-section {
+            margin-bottom: 2rem;
+        }
+        
+        .settings-section:last-child {
+            margin-bottom: 0;
+        }
+        
+        h2 {
+            font-size: 1.25rem;
+            margin-top: 0;
+            margin-bottom: 1rem;
+        }
+        
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 24px;
+            margin-right: 10px;
+        }
+        
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 24px;
+        }
+        
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        
+        input:checked + .slider {
+            background-color: #2196F3;
+        }
+        
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+        
+        .theme-option {
+            display: inline-flex;
+            flex-direction: column;
+            align-items: center;
+            margin-right: 20px;
+            margin-bottom: 15px;
+        }
+        
+        .color-circle {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            cursor: pointer;
+            margin-bottom: 5px;
+            border: 2px solid transparent;
+        }
+        
+        .color-circle.selected {
+            border: 2px solid #0066ff;
+            box-shadow: 0 0 0 2px #fff, 0 0 0 4px #0066ff;
+        }
+        
+        .color-name {
+            font-size: 0.9rem;
+            color: #555;
+        }
+        
+        .checkbox-container {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .checkbox-container input[type="checkbox"] {
+            margin-right: 10px;
+        }
+        
+        .language-dropdown {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            font-size: 1rem;
+            margin-bottom: 15px;
+        }
+        
+        .btn-save {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 4px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        
+        .btn-save:hover {
+            background-color: #0069d9;
+        }
+        
+        .toggle-label {
+            display: flex;
+            align-items: center;
+        }
+        
+        .toggle-text {
+            margin-left: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>User Settings</h1>
+        <p class="subtitle">Customize your MomCare experience</p>
+        
+        <div class="settings-card">
+            <div class="settings-header">
+                Interface Preferences
+            </div>
+            <div class="settings-body">
+                <div class="settings-section">
+                    <h2>Theme Mode</h2>
+                    <label class="toggle-label">
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="darkModeToggle">
+                            <span class="slider"></span>
+                        </label>
+                        <span class="toggle-text">Enable dark mode</span>
+                    </label>
+                </div>
+                
+                <div class="settings-section">
+                    <h2>Theme Color</h2>
+                    <div>
+                        <div class="theme-option">
+                            <div class="color-circle selected" style="background-color: #007bff;" data-color="blue"></div>
+                            <span class="color-name">Blue</span>
+                        </div>
+                        <div class="theme-option">
+                            <div class="color-circle" style="background-color: #28a745;" data-color="green"></div>
+                            <span class="color-name">Green</span>
+                        </div>
+                        <div class="theme-option">
+                            <div class="color-circle" style="background-color: #8540f5;" data-color="purple"></div>
+                            <span class="color-name">Purple</span>
+                        </div>
+                        <div class="theme-option">
+                            <div class="color-circle" style="background-color: #fd7e14;" data-color="orange"></div>
+                            <span class="color-name">Orange</span>
+                        </div>
+                        <div class="theme-option">
+                            <div class="color-circle" style="background-color: #dc3545;" data-color="red"></div>
+                            <span class="color-name">Red</span>
+                        </div>
+                        <div class="theme-option">
+                            <div class="color-circle" style="background-color: #7f7fff;" data-color="custom"></div>
+                            <span class="color-name">Custom</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="settings-section">
+                    <h2>Content Display</h2>
+                    <div class="checkbox-container">
+                        <input type="checkbox" id="showNsfw">
+                        <label for="showNsfw">Show sensitive (NSFW) content</label>
+                    </div>
+                </div>
+                
+                <div class="settings-section">
+                    <h2>Language</h2>
+                    <select class="language-dropdown">
+                        <option value="en">English</option>
+                        <option value="es">Español</option>
+                        <option value="fr">Français</option>
+                        <option value="de">Deutsch</option>
+                        <option value="pt">Português</option>
+                        <option value="ru">Русский</option>
+                    </select>
+                </div>
+                
+                <button class="btn-save">Save Interface Preferences</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Add click event listeners to color circles
+        document.querySelectorAll('.color-circle').forEach(circle => {
+            circle.addEventListener('click', function() {
+                // Remove selected class from all circles
+                document.querySelectorAll('.color-circle').forEach(c => {
+                    c.classList.remove('selected');
+                });
+                
+                // Add selected class to clicked circle
+                this.classList.add('selected');
+            });
+        });
+        
+        // Save preferences function
+        document.querySelector('.btn-save').addEventListener('click', function() {
+            const darkMode = document.getElementById('darkModeToggle').checked;
+            const selectedColor = document.querySelector('.color-circle.selected').getAttribute('data-color');
+            const showNsfw = document.getElementById('showNsfw').checked;
+            const language = document.querySelector('.language-dropdown').value;
+            
+            // You would typically save these preferences to localStorage or send to a server
+            const preferences = {
+                darkMode,
+                themeColor: selectedColor,
+                showNsfw,
+                language
+            };
+            
+            console.log('Saving preferences:', preferences);
+            alert('Settings saved successfully!');
+        });
+    </script>
+</body>
+</html>
