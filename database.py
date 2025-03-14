@@ -112,6 +112,18 @@ CREATE TABLE IF NOT EXISTS pregnancy_profile (
 )
 ''')
 
+# Create user preferences table
+cur.execute('''
+CREATE TABLE IF NOT EXISTS user_preferences (
+    user_id INTEGER PRIMARY KEY,
+    dark_mode BOOLEAN DEFAULT FALSE,
+    theme_color TEXT DEFAULT 'blue',
+    show_nsfw BOOLEAN DEFAULT FALSE,
+    language TEXT DEFAULT 'en',
+    FOREIGN KEY(user_id) REFERENCES users(id)
+)
+''')
+
 # Commit and close connection
 conn.commit()
 conn.close()

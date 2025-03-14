@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="{{ current_language }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}MomCare{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/theme.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/global.css') }}">
+    {% block additional_styles %}{% endblock %}
+</head>
+<body {% if dark_mode %}data-theme="dark"{% endif %}>
+    <nav>
+        <!-- Add your navigation menu here -->
+    </nav>
+    
+    <div id="app">
+        {% block content %}{% endblock %}
+    </div>
+
+    <script>
+        // Initialize theme and language from server-side preferences
+        document.documentElement.style.setProperty('--theme-color', '{{ theme_color }}');
+        document.documentElement.setAttribute('data-theme', '{{ "dark" if dark_mode else "light" }}');
+
+        // Apply theme changes globally
+        function applyTheme(color, isDark) {
+            document.documentElement.style.setProperty('--theme-color', color);
+            document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
+        }
+
+        // Handle language changes
+        function changeLanguage(lang) {
+            localStorage.setItem('language', lang);
+            window.location.reload();
+        }
+
+        function initTheme() {
+            const isDark = localStorage.getItem('darkMode') === 'true';
+            const themeColor = localStorage.getItem('themeColor');
+            
+            if (isDark) {
+                document.documentElement.setAttribute('data-theme', 'dark');
+            }
+            
+            if (themeColor) {
+                document.documentElement.style.setProperty('--theme-color', themeColor);
+                document.documentElement.style.setProperty('--theme-hover', adjustColorBrightness(themeColor, -20));
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', initTheme);
+    </script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

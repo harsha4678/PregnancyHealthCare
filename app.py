@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, session, flash, send_file,jsonify
+from flask import Flask, render_template, request, redirect, url_for, session, flash, send_file,jsonify, g
 import sqlite3
 import os
 from werkzeug.utils import secure_filename
@@ -24,8 +24,12 @@ def get_db_connection():
     conn.row_factory = sqlite3.Row
     return conn
 
-# Home Route
+# Landing Route
 @app.route('/')
+def landing():
+    return render_template('landing.html')
+
+@app.route('/home')
 def home():
     return render_template('home.html')
 
@@ -425,66 +429,120 @@ def pregnancy():
     conn.close()
     return render_template('pregnancy.html', pregnancy_data=pregnancy_data)
 
-# Pregnancy Due Date Calculation
+# Baby size data by week
+BABY_SIZE_DATA = {
+    1: {'size': '0.1 mm', 'weight': 'too small to weigh', 'comparison': 'Invisible to naked eye'},
+    2: {'size': '0.2 mm', 'weight': 'too small to weigh', 'comparison': 'Poppy seed'},
+    3: {'size': '0.9 mm', 'weight': 'too small to weigh', 'comparison': 'Sesame seed'},
+    4: {'size': '2.5 mm', 'weight': '0.001g', 'comparison': 'Rice grain'},
+    5: {'size': '5 mm', 'weight': '0.05g', 'comparison': 'Apple seed'},
+    6: {'size': '8 mm', 'weight': '0.2g', 'comparison': 'Sweet pea'},
+    7: {'size': '13 mm', 'weight': '1g', 'comparison': 'Blueberry'},
+    8: {'size': '16 mm', 'weight': '1.5g', 'comparison': 'Raspberry'},
+    9: {'size': '23 mm', 'weight': '2.5g', 'comparison': 'Green olive'},
+    10: {'size': '31 mm', 'weight': '4g', 'comparison': 'Prune'},
+    11: {'size': '41 mm', 'weight': '7g', 'comparison': 'Fig'},
+    12: {'size': '53 mm', 'weight': '14g', 'comparison': 'Lime'},
+    13: {'size': '74 mm', 'weight': '23g', 'comparison': 'Lemon'},
+    14: {'size': '87 mm', 'weight': '43g', 'comparison': 'Orange'},
+    15: {'size': '97 mm', 'weight': '70g', 'comparison': 'Apple'},
+    16: {'size': '116 mm', 'weight': '100g', 'comparison': 'Avocado'},
+    17: {'size': '133 mm', 'weight': '140g', 'comparison': 'Pear'},
+    18: {'size': '144 mm', 'weight': '190g', 'comparison': 'Bell pepper'},
+    19: {'size': '152 mm', 'weight': '240g', 'comparison': 'Mango'},
+    20: {'size': '160 mm', 'weight': '300g', 'comparison': 'Banana'},
+    # ... Add data for weeks 21-40
+}
+
 @app.route('/calculate_due_date', methods=['POST'])
 def calculate_due_date():
-    date_type = request.form.get('date_type')
-    input_date = request.form.get('input_date')
-    cycle_length = request.form.get('cycle_length', type=int, default=28)
-    embryo_age = request.form.get('embryo_age', type=int, default=0)
-
-    if not input_date:
-        return jsonify({'error': 'Date input is required'}), 400
-
     try:
-        input_datetime = datetime.strptime(input_date, '%Y-%m-%d')
-        
-        if date_type == 'LMP':
-            due_date = input_datetime + timedelta(days=(280 - (28 - cycle_length)))
-        elif date_type == 'Due Date':
-            due_date = input_datetime
-        elif date_type == 'Ultrasound':
-            ultrasound_weeks = request.form.get('ultrasound_weeks', type=int, default=0)
-            ultrasound_days = request.form.get('ultrasound_days', type=int, default=0)
-            due_date = input_datetime + timedelta(days=(280 - (ultrasound_weeks * 7 + ultrasound_days)))
+        date_type = request.form.get('date_type')
+        input_date = datetime.strptime(request.form.get('input_date'), '%Y-%m-%d')
+        today = datetime.now()
+
+        # Calculate conception and due dates based on input type
+        if date_type == 'Ultrasound':
+            # Get weeks and days from ultrasound measurements
+            us_weeks = int(request.form.get('us_weeks', 0))
+            us_days = int(request.form.get('us_days', 0))
+            
+            # Calculate total days of pregnancy at ultrasound
+            total_pregnancy_days = (us_weeks * 7) + us_days
+            
+            # Calculate conception date by subtracting pregnancy length from ultrasound date
+            # and adding 14 days (LMP to conception offset)
+            conception_date = input_date - timedelta(days=total_pregnancy_days-14)
+            
+            # Calculate due date from conception date
+            due_date = conception_date + timedelta(days=266)
+        elif date_type == 'LMP':
+            cycle_length = int(request.form.get('cycle_length', 28))
+            ovulation_day = cycle_length - 14
+            conception_date = input_date + timedelta(days=ovulation_day)
+            due_date = input_date + timedelta(days=280)
         elif date_type == 'Conception Date':
-            due_date = input_datetime + timedelta(days=266)
+            conception_date = input_date
+            due_date = input_date + timedelta(days=266)
+        elif date_type == 'Due Date':
+            due_date = input_date
+            conception_date = input_date - timedelta(days=266)
         elif date_type == 'IVF Transfer Date':
-            due_date = input_datetime + timedelta(days=(266 - embryo_age))
+            embryo_age = int(request.form.get('embryo_age', 3))
+            conception_date = input_date - timedelta(days=embryo_age)
+            due_date = conception_date + timedelta(days=266)
+        
+        # Calculate current week and days remaining
+        days_pregnant = (today - conception_date).days + 14  # Add 14 days as pregnancy is counted from LMP
+        current_week = (days_pregnant // 7) + 1
+        days_remaining = (due_date - today).days
+
+        # Determine trimester
+        if current_week <= 13:
+            trimester = "First Trimester"
+        elif current_week <= 26:
+            trimester = "Second Trimester"
         else:
-            return jsonify({'error': 'Invalid date type selected'}), 400
+            trimester = "Third Trimester"
 
-        days_remaining = (due_date - datetime.today()).days
-
-        # Generate a pregnancy message based on days remaining
-        if days_remaining > 200:
-            message = "You are in the early stages of pregnancy. Stay healthy and hydrated!"
-        elif 100 < days_remaining <= 200:
-            message = "You're in the second trimester! Keep up with prenatal care."
-        elif 30 < days_remaining <= 100:
-            message = "Third trimester! Prepare for your little one's arrival!"
-        elif days_remaining <= 30 and days_remaining > 0:
-            message = "Almost there! Get ready for delivery."
-        else:
-            message = "Your due date has passed. Please consult your doctor."
-
-        conn = get_db_connection()
-        cur = conn.cursor()
-        cur.execute('''
-            INSERT INTO pregnancy_records (date_type, input_date, cycle_length, embryo_age, calculated_due_date)
-            VALUES (?, ?, ?, ?, ?)
-        ''', (date_type, input_date, cycle_length, embryo_age, due_date.strftime('%Y-%m-%d')))
-        conn.commit()
-        conn.close()
+        # Get baby size information
+        size_info = BABY_SIZE_DATA.get(current_week, {
+            'size': 'Not available',
+            'weight': 'Not available',
+            'comparison': 'Not available'
+        })
+        baby_size = f"{size_info['size']} and {size_info['weight']} (about the size of a {size_info['comparison']})"
 
         return jsonify({
-            'due_date': due_date.strftime('%Y-%m-%d'),
+            'due_date': due_date.strftime('%B %d, %Y'),
+            'current_week': current_week,
+            'trimester': trimester,
+            'baby_size': baby_size,
+            'conception_date': conception_date.strftime('%B %d, %Y'),
             'days_remaining': days_remaining,
-            'message': message
+            'message': get_week_message(current_week)
         })
-    
-    except ValueError:
-        return jsonify({'error': 'Invalid date format. Use YYYY-MM-DD'}), 400
+
+    except Exception as e:
+        return jsonify({'error': str(e)})
+
+def get_week_message(week):
+    """Return a specific message based on the current week of pregnancy."""
+    if week < 1:
+        return "Please check your dates."
+    elif week < 4:
+        return "Early pregnancy - Implantation is occurring."
+    elif week < 8:
+        return "Major organs and structures are beginning to form."
+    elif week < 13:
+        return "First trimester - Baby's basic body structure is developing."
+    elif week < 27:
+        return "Second trimester - Period of rapid growth and development."
+    elif week < 37:
+        return "Third trimester - Baby is gaining weight and preparing for birth."
+    else:
+        return "Full term - Baby could arrive any day now!"
+
 @app.route('/weight_gain_calculator', methods=['GET', 'POST'])
 def weight_gain_calculator():
     result = None
@@ -532,19 +590,9 @@ def weight_gain_calculator():
 @app.route('/logout')
 def logout():
     session.clear()
-    return redirect(url_for('home'))
+    return redirect(url_for('landing'))
 
 
-
-  
-
-@app.route('/settings')  
-def settings():  
-    return render_template('settings.html')  # Replace with your settings template path  
-
-@app.route('/notifications')  
-def notifications():  
-    return render_template('notifications.html')  # Replace with your notifications template path  
 
 # Profile page route
 @app.route('/profile1', methods=['GET'])
@@ -637,6 +685,111 @@ def save_profile():
     conn.close()
     
     return redirect('/profile1')
+
+@app.route('/notifications')
+def notifications():
+    return render_template('notifications.html')
+
+@app.route('/settings')
+def settings():
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+
+    conn = get_db_connection()
+    cur = conn.cursor()
+    cur.execute('SELECT * FROM user_preferences WHERE user_id = ?', (session['user_id'],))
+    preferences = cur.fetchone()
+    conn.close()
+
+    default_preferences = {
+        'darkMode': False,
+        'themeColor': 'blue',
+        'showNsfw': False,
+        'language': 'en'
+    }
+
+    user_preferences = dict(preferences) if preferences else default_preferences
+    return render_template('settings.html', preferences=user_preferences)
+
+@app.route('/save_preferences', methods=['POST'])
+def save_preferences():
+    if 'user_id' not in session:
+        return jsonify({'status': 'error', 'message': 'Not authenticated'}), 401
+
+    try:
+        preferences = request.get_json()
+        conn = get_db_connection()
+        cur = conn.cursor()
+
+        # Convert boolean to integer for SQLite
+        dark_mode = 1 if preferences.get('darkMode') else 0
+
+        cur.execute('SELECT 1 FROM user_preferences WHERE user_id = ?', (session['user_id'],))
+        exists = cur.fetchone()
+
+        if exists:
+            cur.execute('''
+                UPDATE user_preferences 
+                SET dark_mode = ?, theme_color = ?, show_nsfw = ?, language = ?
+                WHERE user_id = ?
+            ''', (dark_mode, preferences['themeColor'], preferences['showNsfw'], preferences['language'], session['user_id']))
+        else:
+            cur.execute('''
+                INSERT INTO user_preferences (user_id, dark_mode, theme_color, show_nsfw, language)
+                VALUES (?, ?, ?, ?, ?)
+            ''', (session['user_id'], dark_mode, preferences['themeColor'], preferences['showNsfw'], preferences['language']))
+
+        conn.commit()
+        conn.close()
+
+        # Update session
+        session['preferences'] = {
+            'darkMode': bool(dark_mode),
+            'themeColor': preferences['themeColor'],
+            'showNsfw': preferences['showNsfw'],
+            'language': preferences['language']
+        }
+
+        return jsonify({'status': 'success', 'message': 'Preferences saved successfully'})
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)}), 400
+
+@app.route('/change_language', methods=['POST'])
+def change_language():
+    data = request.get_json()
+    language = data.get('language', 'en')
+    session['language'] = language
+    return jsonify({'status': 'success'})
+
+@app.before_request
+def before_request():
+    if 'user_id' in session:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        cur.execute('SELECT * FROM user_preferences WHERE user_id = ?', (session['user_id'],))
+        preferences = cur.fetchone()
+        conn.close()
+
+        if preferences:
+            g.theme_color = preferences['theme_color']
+            g.dark_mode = preferences['dark_mode']
+            g.language = preferences['language']
+        else:
+            g.theme_color = 'blue'
+            g.dark_mode = False
+            g.language = 'en'
+    else:
+        g.theme_color = 'blue'
+        g.dark_mode = False
+        g.language = 'en'
+
+@app.context_processor
+def inject_preferences():
+    return {
+        'theme_color': getattr(g, 'theme_color', 'blue'),
+        'dark_mode': getattr(g, 'dark_mode', False),
+        'current_language': getattr(g, 'language', 'en')
+    }
 
 # Run the App
 if __name__ == '__main__':

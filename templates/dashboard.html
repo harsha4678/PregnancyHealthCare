@@ -8,8 +8,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         :root {
-            --primary-color: #2c7be5;
-            --secondary-color: #5e9ad9;
+            --primary-color: {{ theme_color|default('#2c7be5') }};
+            --secondary-color: {{ theme_color|default('#5e9ad9') }};
             --background-color: #f4f5f7;
             --text-color: #12263f;
             --card-shadow: 0 8px 20px rgba(0,0,0,0.1);
@@ -19,14 +19,14 @@
         }
 
         [data-theme="dark"] {
-            --primary-color: #4d99ff;
-            --secondary-color: #7ab3ff;
-            --background-color: #121a29;
-            --text-color: #e9ecef;
-            --card-shadow: 0 8px 20px rgba(0,0,0,0.25);
-            --card-bg: #1e293b;
-            --header-bg: #1e293b;
-            --border-color: rgba(255,255,255,0.1);
+            --primary-color: {{ theme_color|default('#ffffff') }};
+            --secondary-color: {{ theme_color|default('#cccccc') }};
+            --background-color: #000000;
+            --text-color: #ffffff;
+            --card-bg: #1a1a1a;
+            --header-bg: #1a1a1a;
+            --border-color: #333333;
+            --card-shadow: 0 8px 20px rgba(0,0,0,0.4);
         }
 
         * {
@@ -344,7 +344,7 @@
                     </button>
             
                     <div class="profile-btn" title="Profile">
-                        <img src="/api/placeholder/40/40" alt="Profile" class="profile-img">
+                        <img src="{{ url_for('static', filename='uploads/woman.png') }}" alt="Profile" class="profile-img">
                         <div id="profile-dropdown" class="profile-dropdown">
                             
 
@@ -448,32 +448,44 @@
     </div>
 
     <script>
-        // Theme toggle functionality
+        // Replace the existing theme toggle code with this updated version
         const themeToggle = document.getElementById('theme-toggle');
         const themeIcon = themeToggle.querySelector('i');
         const html = document.documentElement;
         
-        // Check for saved theme preference or respect OS preference
-        const savedTheme = localStorage.getItem('theme');
-        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-        
-        if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
-            html.setAttribute('data-theme', 'dark');
-            themeIcon.classList.replace('fa-sun', 'fa-moon');
-        }
-        
-        themeToggle.addEventListener('click', () => {
-            if (html.getAttribute('data-theme') === 'dark') {
+        // Initialize theme from localStorage
+        function initializeTheme() {
+            const isDarkMode = localStorage.getItem('darkMode') === 'true';
+            if (isDarkMode) {
+                html.setAttribute('data-theme', 'dark');
+                themeIcon.classList.replace('fa-sun', 'fa-moon');
+                document.body.style.backgroundColor = '#000000';
+            } else {
                 html.removeAttribute('data-theme');
                 themeIcon.classList.replace('fa-moon', 'fa-sun');
-                localStorage.setItem('theme', 'light');
+                document.body.style.backgroundColor = '#f4f5f7';
+            }
+        }
+        
+        // Handle theme toggle
+        themeToggle.addEventListener('click', () => {
+            const isDark = html.getAttribute('data-theme') === 'dark';
+            if (isDark) {
+                html.removeAttribute('data-theme');
+                themeIcon.classList.replace('fa-moon', 'fa-sun');
+                document.body.style.backgroundColor = '#f4f5f7';
+                localStorage.setItem('darkMode', 'false');
             } else {
                 html.setAttribute('data-theme', 'dark');
                 themeIcon.classList.replace('fa-sun', 'fa-moon');
-                localStorage.setItem('theme', 'dark');
+                document.body.style.backgroundColor = '#000000';
+                localStorage.setItem('darkMode', 'true');
             }
         });
-        
+
+        // Initialize theme on page load
+        document.addEventListener('DOMContentLoaded', initializeTheme);
+
         // Profile dropdown toggle
         const profileBtn = document.querySelector('.profile-btn');
         const profileDropdown = document.getElementById('profile-dropdown');
@@ -489,6 +501,31 @@
                 profileDropdown.classList.remove('show');
             }
         });
+
+        // Add this after existing theme toggle code
+        document.addEventListener('DOMContentLoaded', function() {
+            // Apply saved color preference
+            const savedColor = localStorage.getItem('themeColor');
+            if (savedColor) {
+                document.documentElement.style.setProperty('--primary-color', savedColor);
+                document.documentElement.style.setProperty('--secondary-color', adjustColorBrightness(savedColor, 20));
+            }
+        });
+
+        function adjustColorBrightness(hex, percent) {
+            hex = hex.replace('#', '');
+            const num = parseInt(hex, 16);
+            const amt = Math.round(2.55 * percent);
+            const R = (num >> 16) + amt;
+            const G = (num >> 8 & 0x00FF) + amt;
+            const B = (num & 0x0000FF) + amt;
+            return '#' + (
+                0x1000000 +
+                (R < 255 ? R < 1 ? 0 : R : 255) * 0x10000 +
+                (G < 255 ? G < 1 ? 0 : G : 255) * 0x100 +
+                (B < 255 ? B < 1 ? 0 : B : 255)
+            ).toString(16).slice(1);
+        }
     </script>
 </body>
 </html>
