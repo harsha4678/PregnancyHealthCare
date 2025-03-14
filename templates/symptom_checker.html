@@ -1,114 +1,551 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>Symptom Checker - Pregnancy Health Care</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <title>Pregnancy Symptom Checker - AI Assistant</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
+        :root {
+            --primary-color: #2563eb;
+            --primary-hover: #1d4ed8;
+            --light-bg: #f5f8ff;
+            --border-color: #e1e4e8;
+            --text-primary: #1a1a1a;
+            --text-secondary: #4b5563;
+            --assistant-bg: #f0f7ff;
+            --user-bg: #e9ecef;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
         body {
             font-family: 'Inter', sans-serif;
             background-color: #f5f5f7;
             margin: 0;
-            padding: 40px 20px;
+            padding: 0;
+            min-height: 100vh;
+            color: var(--text-primary);
+        }
+
+        .page-container {
+            display: flex;
+            flex-direction: column;
             min-height: 100vh;
         }
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 40px;
-        }
-        h2 {
-            color: #1a1a1a;
-            font-weight: 600;
-            font-size: 28px;
-            margin-bottom: 32px;
+
+        .header {
+            background-color: white;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            padding: 16px;
             text-align: center;
         }
-        .form-group {
-            margin-bottom: 24px;
+
+        .header h1 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--primary-color);
         }
-        .form-group label {
-            font-weight: 500;
-            display: block;
-            margin-bottom: 8px;
-            color: #333;
-            font-size: 15px;
-        }
-        .form-group textarea {
-            width: 100%;
+
+        .description {
+            text-align: center;
             padding: 16px;
-            border: 1px solid #e1e1e1;
-            border-radius: 12px;
-            outline: none;
-            resize: vertical;
-            height: 120px;
-            font-family: 'Inter', sans-serif;
-            font-size: 15px;
+            max-width: 600px;
+            margin: 0 auto;
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        .chat-container {
+            flex: 1;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        .chat-box {
+            flex: 1;
             background-color: white;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
-            transition: all 0.2s ease;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            height: 65vh;
         }
-        .form-group textarea:focus {
-            border-color: #2563eb;
-            box-shadow: 0 0 0 3px rgba(37,99,235,0.1);
+
+        .chat-header {
+            padding: 16px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
         }
-        .btn {
-            background-color: #2563eb;
+
+        .chat-header h2 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .health-icon {
+            color: var(--primary-color);
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .clear-btn {
+            background-color: #f3f4f6;
+            color: #4b5563;
+            border: none;
+            padding: 8px 12px;
+            font-size: 0.85rem;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .clear-btn:hover {
+            background-color: #e5e7eb;
+        }
+
+        .messages {
+            flex: 1;
+            padding: 16px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .message {
+            max-width: 80%;
+            padding: 12px 16px;
+            border-radius: 14px;
+            font-size: 0.95rem;
+            line-height: 1.5;
+            animation: fadeIn 0.3s ease;
+            position: relative;
+            margin-bottom: 4px;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .message-user {
+            background-color: var(--user-bg);
+            color: var(--text-primary);
+            border-top-right-radius: 4px;
+            align-self: flex-end;
+        }
+
+        .message-assistant {
+            background-color: var(--assistant-bg);
+            color: var(--text-primary);
+            border-top-left-radius: 4px;
+            align-self: flex-start;
+        }
+
+        .message-time {
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            opacity: 0.7;
+            margin-top: 4px;
+            text-align: right;
+        }
+
+        .typing-indicator {
+            display: flex;
+            padding: 12px 16px;
+            align-self: flex-start;
+            background-color: var(--assistant-bg);
+            border-radius: 18px;
+            border-top-left-radius: 4px;
+        }
+
+        .typing-indicator span {
+            height: 8px;
+            width: 8px;
+            background-color: rgba(0, 0, 0, 0.3);
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 5px;
+            animation: bounce 1.3s linear infinite;
+        }
+
+        .typing-indicator span:nth-child(2) {
+            animation-delay: 0.15s;
+        }
+
+        .typing-indicator span:nth-child(3) {
+            animation-delay: 0.3s;
+            margin-right: 0;
+        }
+
+        @keyframes bounce {
+            0%, 60%, 100% { transform: translateY(0); }
+            30% { transform: translateY(-4px); }
+        }
+
+        .input-area {
+            padding: 16px;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .message-input {
+            flex: 1;
+            padding: 12px 16px;
+            border: 1px solid var(--border-color);
+            border-radius: 24px;
+            outline: none;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.95rem;
+            resize: none;
+            height: 48px;
+            transition: all 0.2s;
+        }
+
+        .message-input:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(37,99,235,0.1);
+        }
+
+        .send-btn {
+            background-color: var(--primary-color);
             color: white;
             border: none;
-            padding: 16px 32px;
-            border-radius: 12px;
+            height: 48px;
+            width: 48px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             cursor: pointer;
-            font-size: 15px;
-            font-weight: 500;
-            width: 100%;
             transition: all 0.2s ease;
         }
-        .btn:hover {
-            background-color: #1d4ed8;
+
+        .send-btn:hover {
+            background-color: var(--primary-hover);
             transform: translateY(-1px);
         }
-        .btn:active {
+
+        .send-btn:active {
             transform: translateY(0);
         }
-        .advice-container {
-            margin-top: 32px;
-            padding: 24px;
+
+        .send-btn i {
+            font-size: 1.2rem;
+        }
+
+        .welcome-message {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-secondary);
+        }
+
+        .welcome-message h3 {
+            margin-bottom: 12px;
+            color: var(--text-primary);
+        }
+
+        .welcome-message p {
+            margin-bottom: 16px;
+            font-size: 0.95rem;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .examples {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .example-prompt {
             background-color: white;
-            border-radius: 12px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            border: 1px solid var(--border-color);
+            padding: 8px 16px;
+            border-radius: 16px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s;
         }
-        .advice-container h3 {
-            margin: 0 0 16px;
-            color: #1a1a1a;
-            font-size: 18px;
-            font-weight: 600;
+
+        .example-prompt:hover {
+            background-color: var(--light-bg);
+            border-color: var(--primary-color);
         }
-        .advice-container p {
-            margin: 0;
-            color: #4b5563;
-            line-height: 1.6;
-            font-size: 15px;
+
+        .disclaimer {
+            margin-top: 24px;
+            padding: 12px 20px;
+            background-color: #fff4e5;
+            border-left: 4px solid #ff9800;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            color: #663c00;
+            max-width: 900px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .disclaimer strong {
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        @media (max-width: 768px) {
+            .message {
+                max-width: 90%;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h2>Pregnancy Symptom Checker</h2>
-        <form method="POST" action="{{ url_for('symptom_checker') }}">
-            <div class="form-group">
-                <label for="symptom">What symptoms are you experiencing?</label>
-                <textarea name="symptom" id="symptom" placeholder="Please describe your symptoms in detail..." required></textarea>
-            </div>
-            <button type="submit" class="btn">Get Professional Advice</button>
-        </form>
+    <div class="page-container">
+        <div class="header">
+            <h1>Pregnancy Symptom Checker</h1>
+        </div>
 
-        {% if advice %}
-            <div class="advice-container">
-                <h3>Medical Advice</h3>
-                <p>{{ advice }}</p>
+        <div class="description">
+            Chat with our AI medical assistant about your pregnancy symptoms. Get information, potential causes, and general guidance about what you're experiencing.
+        </div>
+
+        <div class="chat-container">
+            <div class="chat-box">
+                <div class="chat-header">
+                    <h2><i class="fas fa-heartbeat health-icon"></i> AI Medical Assistant</h2>
+                    <div class="action-buttons">
+                        <button id="clearChat" class="clear-btn">
+                            <i class="fas fa-trash"></i> Clear chat
+                        </button>
+                    </div>
+                </div>
+
+                <div class="messages" id="messages">
+                    {% if not chat_history %}
+                        <div class="welcome-message">
+                            <h3>Hello! I'm your Pregnancy Health Assistant</h3>
+                            <p>I can provide information about pregnancy symptoms, potential causes, and general guidance. What symptoms are you experiencing?</p>
+
+                            <div class="examples">
+                                <div class="example-prompt">I have morning sickness throughout the day</div>
+                                <div class="example-prompt">My back hurts during the night</div>
+                                <div class="example-prompt">I'm experiencing swelling in my ankles</div>
+                                <div class="example-prompt">I feel dizzy when standing up</div>
+                            </div>
+                        </div>
+                    {% else %}
+                        {% for message in chat_history %}
+                            <div class="message message-{{ 'user' if message.role == 'user' else 'assistant' }}">
+                                {{ message.content|safe }}
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+
+                <div class="input-area">
+                    <textarea
+                        id="messageInput"
+                        class="message-input"
+                        placeholder="Describe your symptoms..."
+                        rows="1"></textarea>
+                    <button id="sendBtn" class="send-btn" title="Send message">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </div>
             </div>
-        {% endif %}
+        </div>
+
+        <div class="disclaimer">
+            <strong>Medical Disclaimer</strong>
+            This tool provides general information only and should not replace professional medical advice. Always consult with your healthcare provider for personalized guidance.
+        </div>
     </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            const messagesContainer = $('#messages');
+            const messageInput = $('#messageInput');
+            const sendBtn = $('#sendBtn');
+            let isWaitingForResponse = false;
+
+            // Auto resize textarea as user types
+            messageInput.on('input', function() {
+                this.style.height = 'auto';
+                this.style.height = (this.scrollHeight) + 'px';
+                if (this.scrollHeight > 120) {
+                    this.style.height = '120px';
+                    this.style.overflowY = 'auto';
+                } else {
+                    this.style.overflowY = 'hidden';
+                }
+            });
+
+            // Handle enter key
+            messageInput.on('keydown', function(e) {
+                if (e.keyCode === 13 && !e.shiftKey) {
+                    e.preventDefault();
+                    sendMessage();
+                }
+            });
+
+            // Send button click
+            sendBtn.on('click', sendMessage);
+
+            // Example prompt click
+            $('.example-prompt').on('click', function() {
+                messageInput.val($(this).text());
+                sendMessage();
+            });
+
+            // Clear chat button
+            $('#clearChat').on('click', function() {
+                $.post('/clear_chat', function(response) {
+                    if (response.status === 'success') {
+                        messagesContainer.empty();
+                        messagesContainer.html(`
+                            <div class="welcome-message">
+                                <h3>Hello! I'm your Pregnancy Health Assistant</h3>
+                                <p>I can provide information about pregnancy symptoms, potential causes, and general guidance. What symptoms are you experiencing?</p>
+
+                                <div class="examples">
+                                    <div class="example-prompt">I have morning sickness throughout the day</div>
+                                    <div class="example-prompt">My back hurts during the night</div>
+                                    <div class="example-prompt">I'm experiencing swelling in my ankles</div>
+                                    <div class="example-prompt">I feel dizzy when standing up</div>
+                                </div>
+                            </div>
+                        `);
+
+                        // Reattach event listeners to new elements
+                        $('.example-prompt').on('click', function() {
+                            messageInput.val($(this).text());
+                            sendMessage();
+                        });
+                    }
+                });
+            });
+
+            // Function to send message
+            function sendMessage() {
+                const message = messageInput.val().trim();
+                if (message === '' || isWaitingForResponse) return;
+
+                // Clear the welcome message if it exists
+                if (messagesContainer.find('.welcome-message').length > 0) {
+                    messagesContainer.empty();
+                }
+
+                // Add user message to chat
+                appendMessage('user', message);
+
+                // Clear input and reset height
+                messageInput.val('');
+                messageInput.css('height', '48px');
+
+                // Show typing indicator
+                showTypingIndicator();
+
+                // Set flag to prevent multiple requests
+                isWaitingForResponse = true;
+
+                // Send message to server
+                $.ajax({
+                    url: '/chat',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({ message: message }),
+                    success: function(response) {
+                        // Remove typing indicator
+                        removeTypingIndicator();
+
+                        // Add assistant response to chat
+                        appendMessage('assistant', response.reply);
+
+                        // Reset flag
+                        isWaitingForResponse = false;
+                    },
+                    error: function(error) {
+                        // Remove typing indicator
+                        removeTypingIndicator();
+
+                        // Add error message
+                        appendMessage('assistant', 'Sorry, there was an error processing your request. Please try again later.');
+
+                        console.error(error);
+
+                        // Reset flag
+                        isWaitingForResponse = false;
+                    }
+                });
+            }
+
+            // Function to append a message to the chat
+            function appendMessage(role, content) {
+                const messageClass = role === 'user' ? 'message-user' : 'message-assistant';
+                const messageHtml = `
+                    <div class="message ${messageClass}">
+                        ${content}
+                    </div>
+                `;
+
+                messagesContainer.append(messageHtml);
+                scrollToBottom();
+            }
+
+            // Function to show typing indicator
+            function showTypingIndicator() {
+                const typingHtml = `
+                    <div class="typing-indicator" id="typingIndicator">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </div>
+                `;
+
+                messagesContainer.append(typingHtml);
+                scrollToBottom();
+            }
+
+            // Function to remove typing indicator
+            function removeTypingIndicator() {
+                $('#typingIndicator').remove();
+            }
+
+            // Function to scroll to bottom of chat
+            function scrollToBottom() {
+                messagesContainer.scrollTop(messagesContainer[0].scrollHeight);
+            }
+
+            // Initial scroll to bottom
+            scrollToBottom();
+        });
+    </script>
 </body>
 </html>

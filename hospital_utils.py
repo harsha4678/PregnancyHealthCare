@@ -1,12 +1,11 @@
-from geopy.geocoders import Nominatim
-import googlemaps
+import os
 import smtplib
 from datetime import datetime, timedelta
-from dotenv import load_dotenv 
-import os
-import requests
-from requests.exceptions import RequestException
 
+import googlemaps
+from dotenv import load_dotenv
+from geopy.geocoders import Nominatim
+from requests.exceptions import RequestException
 
 # Load environment variables from .env file
 load_dotenv()
@@ -16,7 +15,7 @@ GOOGLE_MAPS_API_KEY = os.getenv("GOOGLE_MAPS_API_KEY")
 SENDER_EMAIL = os.getenv("SENDER_EMAIL")
 SENDER_PASSWORD = os.getenv("SENDER_PASSWORD")
 
-gmaps = googlemaps.Client(key=GOOGLE_MAPS_API_KEY)
+gmaps_client = googlemaps.Client(key=GOOGLE_MAPS_API_KEY)
 geolocator = Nominatim(user_agent="hospital_locator")
 
 # Mock database for storing appointments
@@ -106,14 +105,17 @@ def get_hospitals(
         keywords = SPECIALTY_KEYWORDS.get(specialization.lower(), ["hospital"])
 
         if location:
-            # Use location name to get coordinates
+            # Use Google Maps API for geocoding
             try:
-                geo_result = geolocator.geocode(location)
-                if not geo_result:
+                geocode_result = gmaps_client.geocode(location)  # type: ignore
+                if not geocode_result:
                     return {"error": "Invalid location provided."}
-                lat, lng = geo_result.latitude, geo_result.longitude
+                lat = geocode_result[0]["geometry"]["location"]["lat"]
+                lng = geocode_result[0]["geometry"]["location"]["lng"]
             except RequestException as e:
                 return {"error": f"Failed to resolve location: {str(e)}"}
+            except Exception as e:
+                return {"error": f"Geocoding error: {str(e)}"}
         elif latitude and longitude:
             # Use provided latitude and longitude
             lat, lng = latitude, longitude
@@ -124,8 +126,8 @@ def get_hospitals(
 
         # Search using each keyword
         for keyword in keywords:
-            places_result = gmaps.places_nearby(
-                location=(lat, lng), radius=5000, type="hospital", keyword=keyword
+            places_result = gmaps_client.places(  # type: ignore
+                query=keyword, location=(lat, lng), radius=5000, type="hospital"
             )
             # Add hospitals to the result list
             for place in places_result.get("results", []):
@@ -182,6 +184,10 @@ def send_email(to_email, subject, body):
     Utility function to send an email.
     """
     try:
+        if SENDER_EMAIL is None or SENDER_PASSWORD is None:
+            print("Email credentials not available. Check environment variables.")
+            return
+
         with smtplib.SMTP("smtp.gmail.com", 587) as server:
             server.starttls()
             server.login(SENDER_EMAIL, SENDER_PASSWORD)
@@ -211,3 +217,163 @@ def send_reminders():
                 body=f"Hi {appointment['user_name']},\n\nThis is a reminder for your appointment at {appointment['hospital_name']} scheduled for {appointment['slot']}.\n\nThank you!",
             )
             appointment["reminders_sent"] = True
+
+import json
+import os
+import random
+from typing import Any, Dict, List, Optional
+
+# Try to import googlemaps for actual API calls
+try:
+    import googlemaps
+
+    GOOGLEMAPS_AVAILABLE = True
+except ImportError:
+    GOOGLEMAPS_AVAILABLE = False
+    print("Warning: googlemaps library not found. Using mock hospital data.")
+
+# Get API key from environment
+GOOGLE_MAPS_API_KEY = os.environ.get("GOOGLE_MAPS_API_KEY")
+
+# Initialize Google Maps client if API key is available
+gmaps_client = None
+if GOOGLE_MAPS_API_KEY and GOOGLEMAPS_AVAILABLE:
+    try:
+        gmaps_client = googlemaps.Client(key=GOOGLE_MAPS_API_KEY)
+    except Exception as e:
+        print(f"Error initializing Google Maps client: {str(e)}")
+
+# Mock hospital data for testing or when API is unavailable
+MOCK_HOSPITALS = [
+    {
+        "name": "City General Hospital",
+        "address": "123 Main St, City Center",
+        "rating": 4.5,
+        "specializations": [
+            "General Physical",
+            "Gynecologist",
+            "Pediatrician",
+            "Cardiologist",
+        ],
+        "phone": "+1-555-123-4567",
+    },
+    {
+        "name": "Women's Health Center",
+        "address": "456 Oak Ave, Westside",
+        "rating": 4.8,
+        "specializations": ["Gynecologist", "Pediatrician"],
+        "phone": "+1-555-987-6543",
+    },
+    {
+        "name": "Family Care Medical",
+        "address": "789 Pine Rd, Eastside",
+        "rating": 4.2,
+        "specializations": ["General Physical", "Pediatrician", "Dermatologist"],
+        "phone": "+1-555-456-7890",
+    },
+    {
+        "name": "Comprehensive Medical Center",
+        "address": "101 Cedar Blvd, Northside",
+        "rating": 4.6,
+        "specializations": [
+            "Gynecologist",
+            "Neurologist",
+            "Cardiologist",
+            "Orthopedist",
+        ],
+        "phone": "+1-555-789-0123",
+    },
+    {
+        "name": "Community Health Services",
+        "address": "202 Elm St, Southside",
+        "rating": 4.0,
+        "specializations": ["General Physical", "Gynecologist", "Psychiatrist"],
+        "phone": "+1-555-321-6540",
+    },
+]
+
+
+def get_hospitals(
+    location: str, specialization: Optional[str] = None
+) -> Dict[str, Any]:
+    """
+    Get hospitals near a location with optional specialization filter.
+    Falls back to mock data if the Google Maps API is not available.
+
+    Args:
+        location: City or address to search near
+        specialization: Optional medical specialization to filter by
+
+    Returns:
+        Dict with hospitals and status information
+    """
+    try:
+        # Try to use Google Maps API if available
+        if gmaps_client:
+            # Query for places with the 'hospital' type near the provided location
+            places_result = gmaps_client.places_nearby(  # type: ignore
+                location=location,
+                keyword=f"hospital {specialization}" if specialization else "hospital",
+                radius=5000,  # 5km radius
+                type="hospital",
+            )
+
+            # Extract relevant hospital data
+            hospitals = []
+            for place in places_result.get("results", []):
+                hospital = {
+                    "name": place.get("name", "Unknown"),
+                    "address": place.get("vicinity", "No address available"),
+                    "rating": place.get("rating", "No rating"),
+                    "specializations": (
+                        [specialization] if specialization else ["General"]
+                    ),
+                    "place_id": place.get("place_id", ""),
+                }
+                hospitals.append(hospital)
+
+            return {
+                "status": "success",
+                "hospitals": hospitals,
+                "count": len(hospitals),
+                "source": "Google Maps API",
+            }
+        else:
+            # Fall back to mock data if API is not available
+            filtered_hospitals = MOCK_HOSPITALS
+
+            # Filter by specialization if provided
+            if specialization:
+                filtered_hospitals = [
+                    h
+                    for h in MOCK_HOSPITALS
+                    if specialization in h.get("specializations", [])
+                ]
+
+            # Simulate location-based filtering (just randomize for mock data)
+            random.shuffle(filtered_hospitals)
+            # Limit to 3-5 random results for realistic mock data
+            result_count = random.randint(3, min(5, len(filtered_hospitals)))
+            filtered_hospitals = filtered_hospitals[:result_count]
+
+            return {
+                "status": "success",
+                "hospitals": filtered_hospitals,
+                "count": len(filtered_hospitals),
+                "source": "Mock Data",
+            }
+
+    except Exception as e:
+        return {
+            "status": "error",
+            "error": f"Error fetching hospital data: {str(e)}",
+            "hospitals": [],
+            "count": 0,
+        }
+
+
+# For testing purposes
+if __name__ == "__main__":
+    # Test with a sample location
+    result = get_hospitals("New York", "Gynecologist")
+    print(json.dumps(result, indent=2))
